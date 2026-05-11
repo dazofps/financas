@@ -106,6 +106,14 @@
     .item-sub{font-size:12px;color:var(--muted);margin-top:2px;}
     .amount{font-size:15px;font-weight:500;}
     
+    /* LANÇAMENTOS FORMATO CORRIGIDO */
+    .lc-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--surface2);}
+    .lc-row:last-child{border-bottom:none;}
+    .lc-info{flex:1;}
+    .lc-info b{font-size:14px;color:var(--text);font-weight:500;}
+    .lc-info small{font-size:11px;color:var(--muted);}
+    .lc-value{font-size:14px;font-weight:600;margin:0 12px;}
+
     .done-circle{
       width:28px; height:28px; border-radius:50%; border:2px solid var(--border);
       background:var(--surface); display:flex; align-items:center; justify-content:center;
@@ -114,12 +122,13 @@
     .done-circle.yes{background:#1D9E75; border-color:#1D9E75;}
     .done-circle.yes i{font-size:16px;color:#fff;}
 
-    .del-btn{background:none; border:none; color:#E24B4A; font-size:20px; cursor:pointer; padding:4px 8px;}
+    .del-btn{background:none; border:none; color:#E24B4A; font-size:18px; cursor:pointer; padding:4px; display:flex; align-items:center; justify-content:center;}
 
     .progress-bg{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:8px 0 4px;}
     .progress-fill{height:100%;border-radius:99px;}
     .pf-teal{background:#1D9E75;}
     .pf-coral{background:#D85A30;}
+    .pf-blue{background:#378ADD;}
     
     .form-sheet{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r-card);padding:16px;margin-bottom:16px;}
     .form-sheet input, .form-sheet select{width:100%;margin-bottom:10px;font-size:14px;padding:12px;border:0.5px solid var(--border);border-radius:8px;}
@@ -336,9 +345,6 @@ function addConta(){
   if(!n||!v) return;
   C.push({id:Date.now(), nome:n, valor:v, venc:d, pago:false, repetir:r});
   save(); render(); toggleForm('form-conta');
-  document.getElementById('c-nome').value=''; 
-  document.getElementById('c-valor').value='';
-  document.getElementById('c-repetir').checked=false;
 }
 
 function togglePago(id){
@@ -383,14 +389,13 @@ function addToMeta(id){
   const m=M.find(x=>x.id===id);
   if(m && v>0){
     m.atual=Math.min(m.total, m.atual+v);
-    // Marcamos o lançamento com o nome da meta para poder sincronizar na exclusão
     L.unshift({id:Date.now(), tipo:'despesa', desc:`Reserva: ${m.nome}`, valor:v, data:today()});
     save(); render();
     inp.value='';
   }
 }
 
-function delMeta(id){ if(confirm('Excluir meta? Todos os valores guardados nela sumirão.')){M=M.filter(x=>x.id!==id); save(); render();} }
+function delMeta(id){ if(confirm('Excluir meta?')){M=M.filter(x=>x.id!==id); save(); render();} }
 
 function addLanc(){
   const t=document.getElementById('l-tipo').value, d=document.getElementById('l-desc').value, v=parseFloat(document.getElementById('l-valor').value);
@@ -399,16 +404,13 @@ function addLanc(){
   save(); render(); toggleForm('form-lanc');
 }
 
-// CORREÇÃO: Função de excluir lançamento agora atualiza a meta vinculada
 function delLanc(id){ 
   if(confirm('Excluir este lançamento?')){
     const l = L.find(x => x.id === id);
     if(l && l.desc.startsWith("Reserva: ")){
       const metaNome = l.desc.replace("Reserva: ", "");
       const meta = M.find(m => m.nome === metaNome);
-      if(meta){
-        meta.atual = Math.max(0, meta.atual - l.valor);
-      }
+      if(meta) meta.atual = Math.max(0, meta.atual - l.valor);
     }
     L=L.filter(x=>x.id!==id); 
     save(); render();
@@ -437,7 +439,7 @@ function render(){
               <div class="item-sub">${c.venc ? c.venc.split('-').reverse().join('/') : 'Sem data'}</div>
             </div>
           </div>
-          <div style="text-align:right;">
+          <div style="text-align:right; display:flex; align-items:center; gap:8px;">
             <div class="amount">${fmt(c.valor)}</div>
             <button class="del-btn" onclick="delConta(${c.id})">✕</button>
           </div>
@@ -458,10 +460,15 @@ function render(){
 
   const ll=document.getElementById('list-lanc-wrap');
   if(ll) {
-    ll.innerHTML = L.length ? L.slice(0,15).map(l=>`
+    ll.innerHTML = L.length ? L.slice(0,20).map(l=>`
       <div class="lc-row">
-        <div class="lc-info"><b>${l.desc}</b><br><small>${l.data.split('-').reverse().join('/')}</small></div>
-        <div style="color:${l.tipo==='receita'?'#1D9E75':'#E24B4A'}">${l.tipo==='receita'?'+':'-'}${fmt(l.valor)}</div>
+        <div class="lc-info">
+          <b>${l.desc}</b><br>
+          <small>${l.data.split('-').reverse().join('/')}</small>
+        </div>
+        <div class="lc-value" style="color:${l.tipo==='receita'?'#1D9E75':'#E24B4A'}">
+          ${l.tipo==='receita'?'+':'-'}${fmt(l.valor)}
+        </div>
         <button class="del-btn" onclick="delLanc(${l.id})">✕</button>
       </div>`).join('') : '<div class="empty-state">Sem histórico</div>';
   }
