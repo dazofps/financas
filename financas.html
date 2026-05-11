@@ -6,7 +6,18 @@
   <meta name="theme-color" content="#0F6E56">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Minhas Finanças">
+  <meta name="apple-mobile-web-app-title" content="Finanças">
+  
+  <!-- PASSO 3: Vínculo com o Manifesto e Service Worker -->
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log("PWA: Service Worker Ativo"))
+        .catch(err => console.log("PWA: Erro ao registrar", err));
+    }
+  </script>
+
   <title>Minhas Finanças</title>
   
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -29,11 +40,9 @@
     html, body {
       background:#0F6E56;
       font-family:system-ui,-apple-system,sans-serif;
-      /* Fallback para navegadores que não suportam dvh */
-      height: 100vh;
       height: 100dvh;
       overflow: hidden;
-      position: fixed; /* Evita bounce scroll no iOS/Android */
+      position: fixed;
       width: 100%;
     }
 
@@ -42,7 +51,6 @@
       max-width:360px;
       margin:0 auto;
       background:var(--surface2);
-      height: 100vh;
       height: 100dvh;
       display:flex;
       flex-direction:column;
@@ -51,7 +59,6 @@
 
     .hero{
       background:#0F6E56;
-      /* Fallback de 20px caso safe-area não exista */
       padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 24px;
       position:relative;
       flex-shrink:0;
@@ -137,13 +144,11 @@
     .lc-info{flex:1;min-width:0;}
     .lc-desc{font-size:13px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     
-    /* NAVBAR CORRIGIDA PARA COMPATIBILIDADE TOTAL */
     .navbar{
       display:flex;
       border-top:0.5px solid var(--border);
       background:var(--surface);
       flex-shrink:0;
-      /* Adiciona 15px de margem de segurança caso o navegador não suporte safe-area-inset-bottom */
       padding-top: 8px;
       padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
     }
@@ -286,10 +291,13 @@
 let C=[], M=[], L=[];
 let userName = "Caro Cliente";
 
-try{C=JSON.parse(localStorage.getItem('af_c')||'[]');}catch(e){}
-try{M=JSON.parse(localStorage.getItem('af_m')||'[]');}catch(e){}
-try{L=JSON.parse(localStorage.getItem('af_l')||'[]');}catch(e){}
-try{userName = localStorage.getItem('af_userName') || "Caro Cliente";}catch(e){}
+// Carregar Dados
+try{
+  C=JSON.parse(localStorage.getItem('af_c')||'[]');
+  M=JSON.parse(localStorage.getItem('af_m')||'[]');
+  L=JSON.parse(localStorage.getItem('af_l')||'[]');
+  userName = localStorage.getItem('af_userName') || "Caro Cliente";
+}catch(e){}
 
 const COLORS=['teal','blue','amber','coral'];
 
@@ -303,15 +311,6 @@ function save(){
 function fmt(v){return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmtS(v){return 'R$ '+Math.round(v).toLocaleString('pt-BR');}
 function today(){return new Date().toISOString().split('T')[0];}
-function diffDays(d){return Math.round((new Date(d+'T12:00:00')-new Date(today()+'T12:00:00'))/86400000);}
-
-function pill(d){
-  if(!d)return'';
-  const n=diffDays(d);
-  if(n<0)return'<span class="pill pill-danger"><i class="ti ti-alert-circle"></i>Vencida</span>';
-  if(n===0)return'<span class="pill pill-warn">Hoje</span>';
-  return'<span class="pill pill-info">'+n+'d</span>';
-}
 
 function editUserName(){
   const n = prompt("Seu nome:", userName);
@@ -411,7 +410,6 @@ function render(){
         </div>
         <div style="text-align:right;">
           <div class="amount">${fmt(c.valor)}</div>
-          ${!c.pago?pill(c.venc):'<span class="pill pill-ok">Paga</span>'}
           <button class="del-btn" onclick="delConta(${c.id})">✕</button>
         </div>
       </div>
