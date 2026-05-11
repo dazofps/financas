@@ -39,11 +39,10 @@
       background:var(--surface2);
       height:100dvh;
       overflow:hidden;
-      border-radius:0;
     }
     .hero{
       background:#0F6E56;
-      padding:20px 20px 24px;
+      padding:50px 20px 24px;   /* Espaço aumentado no topo */
     }
     .hero-greeting{font-size:13px;color:#9FE1CB;margin-bottom:2px;}
     .hero-name{font-size:20px;font-weight:500;color:#fff;margin-bottom:20px;}
@@ -163,7 +162,7 @@
 
   <div class="hero">
     <p class="hero-greeting">Olá,</p>
-    <p class="hero-name">Minhas Finanças</p>
+    <p class="hero-name">Daniel</p>
     <div class="hero-card">
       <p class="hero-card-label">Saldo disponível</p>
       <p class="hero-card-value" id="hero-saldo">R$ 0,00</p>
@@ -376,7 +375,6 @@ function render(){
   if(document.getElementById('cnt-aberto'))document.getElementById('cnt-aberto').textContent=fmt(aberto);
   if(document.getElementById('cnt-pago'))document.getElementById('cnt-pago').textContent=fmt(pago);
 
-  // Render das outras seções (mantido igual)
   const lc=document.getElementById('list-contas');
   if(lc){
     const sorted=[...C].sort((a,b)=>{if(a.pago!==b.pago)return a.pago?1:-1;return(a.venc||'9999')<(b.venc||'9999')?-1:1;});
@@ -385,9 +383,9 @@ function render(){
       <div class="card" style="${c.pago?'opacity:.55':''}">
         <div class="row-between">
           <div class="row" style="gap:10px;flex:1;min-width:0;">
-            <div class="done-circle ${c.pago?'yes':''}" onclick="togglePago(${c.id})">${c.pago?'<i class="ti ti-check" aria-hidden="true" style="font-size:11px;"></i>':''}</div>
+            <div class="done-circle ${c.pago?'yes':''}" onclick="togglePago(${c.id})" aria-label="${c.pago?'Reabrir':'Marcar como paga'}">${c.pago?'<i class="ti ti-check" aria-hidden="true" style="font-size:11px;"></i>':''}</div>
             <div style="min-width:0;">
-              <div class="item-name">${c.nome}</div>
+              <div class="item-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.nome}</div>
               <div class="item-sub">${c.venc?'Vence '+c.venc.split('-').reverse().join('/'):'Sem vencimento'}</div>
             </div>
           </div>
@@ -395,13 +393,12 @@ function render(){
             ${c.venc&&!c.pago?pill(c.venc):''}
             ${c.pago?'<span class="pill pill-ok"><i class="ti ti-check" style="font-size:10px;" aria-hidden="true"></i>Paga</span>':''}
             <div class="amount">${fmt(c.valor)}</div>
-            <button class="del-btn" onclick="delConta(${c.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+            <button class="del-btn" onclick="delConta(${c.id})" aria-label="Remover"><i class="ti ti-trash" aria-hidden="true"></i></button>
           </div>
         </div>
       </div>`).join('');
   }
 
-  // Render Metas, Lançamentos e Resumo (mantido)
   const lm=document.getElementById('list-metas');
   if(lm){
     if(!M.length){lm.innerHTML='<div class="empty-state"><i class="ti ti-target-off" aria-hidden="true"></i>Nenhuma meta criada</div>';}
@@ -413,7 +410,7 @@ function render(){
           <span class="item-name">${m.nome}</span>
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="font-size:12px;color:var(--muted);">${pct}%</span>
-            <button class="del-btn" onclick="delMeta(${m.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+            <button class="del-btn" onclick="delMeta(${m.id})" aria-label="Remover meta"><i class="ti ti-trash" aria-hidden="true"></i></button>
           </div>
         </div>
         <div class="progress-bg"><div class="progress-fill pf-${m.color}" style="width:${pct}%"></div></div>
@@ -426,8 +423,6 @@ function render(){
     }).join('');
   }
 
-  // ... (o resto do render continua funcionando normalmente)
-
   const llw=document.getElementById('list-lanc-wrap');
   if(llw){
     if(!L.length){llw.innerHTML='<div class="empty-state" style="padding:12px 0;"><i class="ti ti-list-search" aria-hidden="true"></i>Nenhum lançamento</div>';}
@@ -439,7 +434,7 @@ function render(){
           <div class="lc-date">${l.data.split('-').reverse().join('/')}</div>
         </div>
         <span class="amount" style="color:${l.tipo==='receita'?'#1D9E75':'#E24B4A'};flex-shrink:0;">${l.tipo==='receita'?'+':'-'}${fmt(l.valor)}</span>
-        <button class="del-btn" onclick="delLanc(${l.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+        <button class="del-btn" onclick="delLanc(${l.id})" aria-label="Remover"><i class="ti ti-trash" aria-hidden="true"></i></button>
       </div>`).join('');
   }
 
@@ -472,6 +467,10 @@ function render(){
         </div>`).join('');
     }
   }
+
+  const now=new Date();
+  const h=now.getHours().toString().padStart(2,'0');
+  const min=now.getMinutes().toString().padStart(2,'0');
 }
 
 render();
