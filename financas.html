@@ -18,12 +18,12 @@
     :root{
       --brand:#1D9E75;--brand-dark:#0F6E56;--brand-light:#E1F5EE;
       --danger:#E24B4A;--warn:#EF9F27;--ok:#1D9E75;
-      --surface:var(--color-background-primary);
-      --surface2:var(--color-background-secondary);
-      --border:var(--color-border-tertiary);
-      --text:var(--color-text-primary);
-      --muted:var(--color-text-secondary);
-      --hint:var(--color-text-tertiary);
+      --surface:#ffffff;
+      --surface2:#f8f9fa;
+      --border:#e0e0e0;
+      --text:#212121;
+      --muted:#666666;
+      --hint:#999999;
       --r-phone:24px;--r-card:16px;--r-pill:99px;
     }
     body{
@@ -47,6 +47,7 @@
     }
     .hero-greeting{font-size:13px;color:#9FE1CB;margin-bottom:2px;}
     .hero-name{font-size:20px;font-weight:500;color:#fff;margin-bottom:20px;}
+    
     .settings-btn{
       position:absolute;
       top:50px;
@@ -55,10 +56,10 @@
       border:none;
       font-size:24px;
       color:#fff;
-      opacity:0.8;
+      opacity:0.85;
       cursor:pointer;
+      z-index:10;
     }
-    .settings-btn:hover{opacity:1;}
 
     .hero-card{
       background:#1D9E75;
@@ -71,6 +72,7 @@
     .hero-mini{background:rgba(255,255,255,0.12);border-radius:10px;padding:10px 12px;}
     .hero-mini-label{font-size:11px;color:#9FE1CB;margin-bottom:2px;}
     .hero-mini-value{font-size:15px;font-weight:500;color:#fff;}
+
     .scroller{overflow-x:auto;display:flex;gap:8px;padding:16px 20px 4px;scrollbar-width:none;}
     .scroller::-webkit-scrollbar{display:none;}
     .chip{flex-shrink:0;padding:8px 16px;border-radius:var(--r-pill);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--border);background:var(--surface);color:var(--muted);white-space:nowrap;}
@@ -89,11 +91,38 @@
     .pill-warn{background:#FAEEDA;color:#633806;}
     .pill-ok{background:#E1F5EE;color:#085041;}
     .pill-info{background:#E6F1FB;color:#0C447C;}
-    .done-circle{width:22px;height:22px;border-radius:50%;border:0.5px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
-    .done-circle.yes{background:#1D9E75;border-color:#1D9E75;}
-    .done-circle.yes i{font-size:12px;color:#fff;}
-    .del-btn{background:none;border:none;cursor:pointer;color:var(--hint);padding:4px;display:flex;align-items:center;font-size:16px;}
-    .del-btn:hover{color:var(--danger);}
+    
+    .done-circle{
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      border:2px solid var(--border);
+      background:var(--surface);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      flex-shrink:0;
+    }
+    .done-circle.yes{
+      background:#1D9E75;
+      border-color:#1D9E75;
+    }
+    .done-circle.yes i{font-size:16px;color:#fff;}
+
+    .del-btn{
+      background:none;
+      border:none;
+      color:#E24B4A;
+      font-size:20px;
+      cursor:pointer;
+      padding:4px 8px;
+      border-radius:6px;
+    }
+    .del-btn:hover{
+      background:#FFEBEE;
+    }
+
     .progress-bg{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:8px 0 4px;}
     .progress-fill{height:100%;border-radius:99px;}
     .pf-teal{background:#1D9E75;}
@@ -240,6 +269,8 @@ try{M=JSON.parse(localStorage.getItem('af_m')||'[]');}catch(e){}
 try{L=JSON.parse(localStorage.getItem('af_l')||'[]');}catch(e){}
 try{userName = localStorage.getItem('af_userName') || "Minhas Finanças";}catch(e){}
 
+const COLORS=['teal','blue','amber','coral'];
+
 function save(){
   try{
     localStorage.setItem('af_c',JSON.stringify(C));
@@ -250,7 +281,7 @@ function save(){
 }
 
 function editUserName(){
-  const novo = prompt("Digite seu nome (ou como quer ser chamado):", userName);
+  const novo = prompt("Digite seu nome:", userName);
   if(novo !== null && novo.trim() !== ""){
     userName = novo.trim();
     document.getElementById('user-name').textContent = userName;
@@ -258,7 +289,6 @@ function editUserName(){
   }
 }
 
-// Funções restantes (mesmas de antes)
 function fmt(v){return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmtS(v){return 'R$ '+Math.round(v).toLocaleString('pt-BR');}
 function today(){return new Date().toISOString().split('T')[0];}
@@ -273,7 +303,10 @@ function pill(d){
   return'<span class="pill pill-info">'+n+'d</span>';
 }
 
-function toggleForm(id){document.getElementById(id).classList.toggle('open');}
+function toggleForm(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+}
 
 function nav(page, chip, nb){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
@@ -285,8 +318,6 @@ function nav(page, chip, nb){
   if(nbEl)nbEl.classList.add('active');
   render();
 }
-
-// ... (demais funções addConta, addMeta, etc. permanecem iguais) ...
 
 function addConta(){
   const nome=document.getElementById('c-nome').value.trim();
@@ -306,7 +337,11 @@ function togglePago(id){
   const c=C.find(x=>x.id===id);
   if(c){c.pago=!c.pago;save();render();}
 }
-function delConta(id){C=C.filter(x=>x.id!==id);save();render();}
+function delConta(id){
+  if(confirm('Excluir esta conta?')){
+    C=C.filter(x=>x.id!==id);save();render();
+  }
+}
 
 function addMeta(){
   const nome=document.getElementById('m-nome').value.trim();
@@ -329,7 +364,11 @@ function addToMeta(id){
   const m=M.find(x=>x.id===id);
   if(m){m.atual=Math.min(m.total,m.atual+v);save();inp.value='';render();}
 }
-function delMeta(id){M=M.filter(x=>x.id!==id);save();render();}
+function delMeta(id){
+  if(confirm('Excluir esta meta?')){
+    M=M.filter(x=>x.id!==id);save();render();
+  }
+}
 
 function addLanc(){
   const tipo=document.getElementById('l-tipo').value;
@@ -343,9 +382,11 @@ function addLanc(){
   document.getElementById('form-lanc').classList.remove('open');
   render();
 }
-function delLanc(id){L=L.filter(x=>x.id!==id);save();render();}
-
-const COLORS=['teal','blue','amber','coral'];
+function delLanc(id){
+  if(confirm('Excluir este lançamento?')){
+    L=L.filter(x=>x.id!==id);save();render();
+  }
+}
 
 function render(){
   const rec=L.filter(l=>l.tipo==='receita').reduce((s,l)=>s+l.valor,0);
@@ -363,16 +404,15 @@ function render(){
   if(document.getElementById('cnt-aberto'))document.getElementById('cnt-aberto').textContent=fmt(aberto);
   if(document.getElementById('cnt-pago'))document.getElementById('cnt-pago').textContent=fmt(pago);
 
-  // Render Contas, Metas, Lançamentos e Resumo (igual ao anterior)
   const lc=document.getElementById('list-contas');
   if(lc){
     const sorted=[...C].sort((a,b)=>{if(a.pago!==b.pago)return a.pago?1:-1;return(a.venc||'9999')<(b.venc||'9999')?-1:1;});
     if(!sorted.length){lc.innerHTML='<div class="empty-state"><i class="ti ti-file-off" aria-hidden="true"></i>Nenhuma conta ainda</div>';}
     else lc.innerHTML=sorted.map(c=>`
-      <div class="card" style="${c.pago?'opacity:.55':''}">
+      <div class="card" style="${c.pago?'opacity:.7':''}">
         <div class="row-between">
-          <div class="row" style="gap:10px;flex:1;min-width:0;">
-            <div class="done-circle ${c.pago?'yes':''}" onclick="togglePago(${c.id})">${c.pago?'<i class="ti ti-check" aria-hidden="true" style="font-size:11px;"></i>':''}</div>
+          <div class="row" style="gap:12px;flex:1;min-width:0;">
+            <div class="done-circle ${c.pago?'yes':''}" onclick="togglePago(${c.id})">${c.pago?'<i class="ti ti-check" aria-hidden="true"></i>':''}</div>
             <div style="min-width:0;">
               <div class="item-name">${c.nome}</div>
               <div class="item-sub">${c.venc?'Vence '+c.venc.split('-').reverse().join('/'):'Sem vencimento'}</div>
@@ -380,15 +420,14 @@ function render(){
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
             ${c.venc&&!c.pago?pill(c.venc):''}
-            ${c.pago?'<span class="pill pill-ok"><i class="ti ti-check" style="font-size:10px;" aria-hidden="true"></i>Paga</span>':''}
+            ${c.pago?'<span class="pill pill-ok">Paga</span>':''}
             <div class="amount">${fmt(c.valor)}</div>
-            <button class="del-btn" onclick="delConta(${c.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+            <button class="del-btn" onclick="delConta(${c.id})">✕</button>
           </div>
         </div>
       </div>`).join('');
   }
 
-  // Render Metas
   const lm=document.getElementById('list-metas');
   if(lm){
     if(!M.length){lm.innerHTML='<div class="empty-state"><i class="ti ti-target-off" aria-hidden="true"></i>Nenhuma meta criada</div>';}
@@ -400,7 +439,7 @@ function render(){
           <span class="item-name">${m.nome}</span>
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="font-size:12px;color:var(--muted);">${pct}%</span>
-            <button class="del-btn" onclick="delMeta(${m.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+            <button class="del-btn" onclick="delMeta(${m.id})">✕</button>
           </div>
         </div>
         <div class="progress-bg"><div class="progress-fill pf-${m.color}" style="width:${pct}%"></div></div>
@@ -408,12 +447,11 @@ function render(){
         ${falta>0?`<div style="display:flex;gap:6px;margin-top:10px;">
           <input id="mi-${m.id}" type="number" placeholder="Guardar R$..." style="flex:1;font-size:13px;" />
           <button onclick="addToMeta(${m.id})" style="padding:8px 12px;font-size:13px;background:#0F6E56;color:#fff;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-plus" aria-hidden="true"></i></button>
-        </div>`:'<div style="margin-top:8px;"><span class="pill pill-ok"><i class="ti ti-check" style="font-size:10px;" aria-hidden="true"></i> Meta atingida!</span></div>'}
+        </div>`:'<div style="margin-top:8px;"><span class="pill pill-ok">Meta atingida!</span></div>'}
       </div>`;
     }).join('');
   }
 
-  // Render Lançamentos
   const llw=document.getElementById('list-lanc-wrap');
   if(llw){
     if(!L.length){llw.innerHTML='<div class="empty-state" style="padding:12px 0;"><i class="ti ti-list-search" aria-hidden="true"></i>Nenhum lançamento</div>';}
@@ -425,11 +463,10 @@ function render(){
           <div class="lc-date">${l.data.split('-').reverse().join('/')}</div>
         </div>
         <span class="amount" style="color:${l.tipo==='receita'?'#1D9E75':'#E24B4A'};flex-shrink:0;">${l.tipo==='receita'?'+':'-'}${fmt(l.valor)}</span>
-        <button class="del-btn" onclick="delLanc(${l.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+        <button class="del-btn" onclick="delLanc(${l.id})">✕</button>
       </div>`).join('');
   }
 
-  // Render Resumo
   if(document.getElementById('r-saldo')){
     document.getElementById('r-saldo').textContent=fmt(saldo);
     document.getElementById('r-saldo').style.color=saldo>=0?'#1D9E75':'#E24B4A';
