@@ -11,9 +11,7 @@
   <link rel="manifest" href="manifest.json">
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js')
-        .then(() => console.log("PWA: Ativo"))
-        .catch(err => console.log("PWA: Erro", err));
+      navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
     }
   </script>
 
@@ -121,22 +119,20 @@
     .progress-bg{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:8px 0 4px;}
     .progress-fill{height:100%;border-radius:99px;}
     .pf-teal{background:#1D9E75;}
-    .pf-blue{background:#378ADD;}
-    .pf-amber{background:#EF9F27;}
     .pf-coral{background:#D85A30;}
     
     .form-sheet{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r-card);padding:16px;margin-bottom:16px;}
     .form-sheet input, .form-sheet select{width:100%;margin-bottom:10px;font-size:14px;padding:12px;border:0.5px solid var(--border);border-radius:8px;}
     .form-sheet button{width:100%;background:#0F6E56;color:#fff;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:500;cursor:pointer;}
+    
+    .checkbox-row{display:flex;align-items:center;gap:10px;margin-bottom:15px;font-size:14px;color:var(--text);}
+    .checkbox-row input{width:18px;height:18px;margin:0;}
+
     .fab{display:flex;align-items:center;justify-content:center;gap:6px;background:#0F6E56;color:#fff;border:none;border-radius:var(--r-pill);padding:12px 20px;font-size:14px;font-weight:500;cursor:pointer;width:100%;margin-bottom:14px;}
     
     .toggle-form{display:none;}
     .toggle-form.open{display:block;}
 
-    .lc-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);}
-    .lc-info{flex:1;min-width:0;}
-    .lc-desc{font-size:13px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    
     .navbar{
       display:flex;
       border-top:0.5px solid var(--border);
@@ -194,7 +190,6 @@
   </div>
 
   <div class="main-content">
-    <!-- ORDEM ALTERADA NOS CHIPS -->
     <div class="scroller" id="chips-bar">
       <div class="chip active" onclick="nav('resumo',this)"><i class="ti ti-chart-bar"></i> Resumo</div>
       <div class="chip" onclick="nav('contas',this)"><i class="ti ti-file-invoice"></i> Contas</div>
@@ -202,7 +197,7 @@
       <div class="chip" onclick="nav('lanc',this)"><i class="ti ti-arrows-exchange"></i> Lançamentos</div>
     </div>
 
-    <!-- 1. RESUMO AGORA É O PRIMEIRO -->
+    <!-- 1. RESUMO -->
     <div class="section show" id="sec-resumo">
       <div style="height:16px;"></div>
       <div class="sum-grid">
@@ -227,6 +222,9 @@
         <input type="text" id="c-nome" placeholder="Nome da conta" />
         <input type="number" id="c-valor" placeholder="Valor (R$)" />
         <input type="date" id="c-venc" />
+        <label class="checkbox-row">
+          <input type="checkbox" id="c-repetir"> Repetir mensalmente
+        </label>
         <button onclick="addConta()">Adicionar conta</button>
       </div>
       <p class="sec-title">Minhas Contas</p>
@@ -240,8 +238,8 @@
         <i class="ti ti-plus"></i> Nova meta
       </button>
       <div class="toggle-form form-sheet" id="form-meta">
-        <input type="text" id="m-nome" placeholder="Ex: Viagem, Carro..." />
-        <input type="number" id="m-total" placeholder="Meta final (R$)" />
+        <input type="text" id="m-nome" placeholder="Ex: Viagem, Reserva..." />
+        <input type="number" id="m-total" placeholder="Valor total (R$)" />
         <input type="number" id="m-atual" placeholder="Já tenho (R$)" />
         <button onclick="addMeta()">Criar meta</button>
       </div>
@@ -266,7 +264,6 @@
     </div>
   </div>
 
-  <!-- NAVBAR COM ORDEM ALTERADA -->
   <nav class="navbar">
     <button class="nav-btn active" id="nb-resumo" onclick="nav('resumo',null,this)">
       <i class="ti ti-chart-bar"></i>
@@ -294,8 +291,6 @@ try{
   userName = localStorage.getItem('af_userName') || "Caro Cliente";
 }catch(e){}
 
-const COLORS=['teal','blue','amber','coral'];
-
 function save(){
   localStorage.setItem('af_c',JSON.stringify(C));
   localStorage.setItem('af_m',JSON.stringify(M));
@@ -306,6 +301,13 @@ function save(){
 function fmt(v){return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmtS(v){return 'R$ '+Math.round(v).toLocaleString('pt-BR');}
 function today(){return new Date().toISOString().split('T')[0];}
+
+function getNextMonthDate(dateStr) {
+  if(!dateStr) return "";
+  let d = new Date(dateStr + "T12:00:00");
+  d.setMonth(d.getMonth() + 1);
+  return d.toISOString().split('T')[0];
+}
 
 function editUserName(){
   const n = prompt("Seu nome:", userName);
@@ -318,32 +320,41 @@ function nav(page, chip, nb){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
   const target = document.getElementById('sec-'+page);
   if(target) target.classList.add('show');
-  
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  
   if(chip) chip.classList.add('active');
   const navBtn = document.getElementById('nb-'+page);
   if(navBtn) navBtn.classList.add('active');
-  
   render();
 }
 
 function addConta(){
-  const n=document.getElementById('c-nome').value, v=parseFloat(document.getElementById('c-valor').value), d=document.getElementById('c-venc').value;
+  const n=document.getElementById('c-nome').value, 
+        v=parseFloat(document.getElementById('c-valor').value), 
+        d=document.getElementById('c-venc').value,
+        r=document.getElementById('c-repetir').checked;
   if(!n||!v) return;
-  C.push({id:Date.now(),nome:n,valor:v,venc:d,pago:false});
+  C.push({id:Date.now(), nome:n, valor:v, venc:d, pago:false, repetir:r});
   save(); render(); toggleForm('form-conta');
-  document.getElementById('c-nome').value=''; document.getElementById('c-valor').value='';
+  document.getElementById('c-nome').value=''; 
+  document.getElementById('c-valor').value='';
+  document.getElementById('c-repetir').checked=false;
 }
 
 function togglePago(id){
-  const c=C.find(x=>x.id===id);
+  const c = C.find(x=>x.id===id);
   if(c){
-    c.pago=!c.pago;
+    c.pago = !c.pago;
     if(c.pago){
       c.linkedLancId = Date.now();
       L.unshift({id: c.linkedLancId, tipo: 'despesa', desc: `Pagamento: ${c.nome}`, valor: c.valor, data: today()});
+      if(c.repetir) {
+        const novaData = getNextMonthDate(c.venc);
+        const jaExiste = C.find(x => x.nome === c.nome && x.venc === novaData);
+        if(!jaExiste) {
+          C.push({id: Date.now() + 1, nome: c.nome, valor: c.valor, venc: novaData, pago: false, repetir: true});
+        }
+      }
     } else if(c.linkedLancId){
       L = L.filter(l => l.id !== c.linkedLancId);
       delete c.linkedLancId;
@@ -353,7 +364,7 @@ function togglePago(id){
 }
 
 function delConta(id){
-  if(confirm('Excluir?')){
+  if(confirm('Excluir conta?')){
     const c=C.find(x=>x.id===id);
     if(c && c.linkedLancId) L = L.filter(l => l.id !== c.linkedLancId);
     C=C.filter(x=>x.id!==id); save(); render();
@@ -363,7 +374,7 @@ function delConta(id){
 function addMeta(){
   const n=document.getElementById('m-nome').value, t=parseFloat(document.getElementById('m-total').value), a=parseFloat(document.getElementById('m-atual').value)||0;
   if(!n||!t) return;
-  M.push({id:Date.now(),nome:n,total:t,atual:a,color:COLORS[M.length%4]});
+  M.push({id:Date.now(),nome:n,total:t,atual:a,color:'teal'});
   save(); render(); toggleForm('form-meta');
 }
 
@@ -372,12 +383,14 @@ function addToMeta(id){
   const m=M.find(x=>x.id===id);
   if(m && v>0){
     m.atual=Math.min(m.total, m.atual+v);
+    // Marcamos o lançamento com o nome da meta para poder sincronizar na exclusão
     L.unshift({id:Date.now(), tipo:'despesa', desc:`Reserva: ${m.nome}`, valor:v, data:today()});
     save(); render();
+    inp.value='';
   }
 }
 
-function delMeta(id){ if(confirm('Excluir?')){M=M.filter(x=>x.id!==id); save(); render();} }
+function delMeta(id){ if(confirm('Excluir meta? Todos os valores guardados nela sumirão.')){M=M.filter(x=>x.id!==id); save(); render();} }
 
 function addLanc(){
   const t=document.getElementById('l-tipo').value, d=document.getElementById('l-desc').value, v=parseFloat(document.getElementById('l-valor').value);
@@ -386,7 +399,21 @@ function addLanc(){
   save(); render(); toggleForm('form-lanc');
 }
 
-function delLanc(id){ if(confirm('Excluir?')){L=L.filter(x=>x.id!==id); save(); render();} }
+// CORREÇÃO: Função de excluir lançamento agora atualiza a meta vinculada
+function delLanc(id){ 
+  if(confirm('Excluir este lançamento?')){
+    const l = L.find(x => x.id === id);
+    if(l && l.desc.startsWith("Reserva: ")){
+      const metaNome = l.desc.replace("Reserva: ", "");
+      const meta = M.find(m => m.nome === metaNome);
+      if(meta){
+        meta.atual = Math.max(0, meta.atual - l.valor);
+      }
+    }
+    L=L.filter(x=>x.id!==id); 
+    save(); render();
+  } 
+}
 
 function render(){
   const rec=L.filter(l=>l.tipo==='receita').reduce((s,l)=>s+l.valor,0);
@@ -398,19 +425,17 @@ function render(){
   document.getElementById('hero-desp').textContent=fmtS(desp);
   document.getElementById('user-name').textContent = userName;
 
-  const cntA = document.getElementById('cnt-aberto');
-  if(cntA) cntA.textContent=fmt(aberto);
-  const cntP = document.getElementById('cnt-pago');
-  if(cntP) cntP.textContent=fmt(pago);
-
   const lc=document.getElementById('list-contas');
   if(lc) {
-    lc.innerHTML = C.length ? C.sort((a,b)=>a.pago-b.pago).map(c=>`
+    lc.innerHTML = C.length ? C.sort((a,b)=>a.pago-b.pago || new Date(a.venc)-new Date(b.venc)).map(c=>`
       <div class="card" style="${c.pago?'opacity:.6':''}">
         <div class="row-between">
           <div style="display:flex;align-items:center;gap:12px;">
             <div class="done-circle ${c.pago?'yes':''}" onclick="togglePago(${c.id})">${c.pago?'<i class="ti ti-check"></i>':''}</div>
-            <div><div class="item-name">${c.nome}</div><div class="item-sub">${c.venc||'Sem data'}</div></div>
+            <div>
+              <div class="item-name">${c.nome} ${c.repetir?'<i class="ti ti-refresh" style="font-size:10px;color:var(--brand)"></i>':''}</div>
+              <div class="item-sub">${c.venc ? c.venc.split('-').reverse().join('/') : 'Sem data'}</div>
+            </div>
           </div>
           <div style="text-align:right;">
             <div class="amount">${fmt(c.valor)}</div>
@@ -425,28 +450,26 @@ function render(){
     lm.innerHTML = M.length ? M.map(m=>`
       <div class="card">
         <div class="row-between"><b>${m.nome}</b> <button class="del-btn" onclick="delMeta(${m.id})">✕</button></div>
-        <div class="progress-bg"><div class="progress-fill pf-${m.color}" style="width:${(m.atual/m.total)*100}%"></div></div>
+        <div class="progress-bg"><div class="progress-fill pf-teal" style="width:${(m.atual/m.total)*100}%"></div></div>
         <div class="row-between" style="font-size:12px;"><span>${fmt(m.atual)}</span><span>${fmt(m.total)}</span></div>
         ${m.atual < m.total ? `<div style="display:flex;gap:5px;margin-top:10px;"><input id="mi-${m.id}" type="number" placeholder="R$"/><button onclick="addToMeta(${m.id})" style="background:#0F6E56;color:#fff;border:none;padding:5px 10px;border-radius:5px;">+</button></div>` : ''}
-      </div>`).join('') : '<div class="empty-state">Sem metas no momento</div>';
+      </div>`).join('') : '<div class="empty-state">Sem metas</div>';
   }
 
   const ll=document.getElementById('list-lanc-wrap');
   if(ll) {
-    ll.innerHTML = L.length ? L.slice(0,20).map(l=>`
+    ll.innerHTML = L.length ? L.slice(0,15).map(l=>`
       <div class="lc-row">
-        <div class="lc-info"><b>${l.desc}</b><br><small>${l.data}</small></div>
+        <div class="lc-info"><b>${l.desc}</b><br><small>${l.data.split('-').reverse().join('/')}</small></div>
         <div style="color:${l.tipo==='receita'?'#1D9E75':'#E24B4A'}">${l.tipo==='receita'?'+':'-'}${fmt(l.valor)}</div>
         <button class="del-btn" onclick="delLanc(${l.id})">✕</button>
-      </div>`).join('') : '<div class="empty-state">Sem lançamentos</div>';
+      </div>`).join('') : '<div class="empty-state">Sem histórico</div>';
   }
 
   if(document.getElementById('r-saldo')){
     document.getElementById('r-saldo').textContent=fmt(saldo);
     document.getElementById('r-contas').textContent=fmt(aberto);
     document.getElementById('r-metas').textContent=fmt(M.reduce((s,m)=>s+m.atual,0));
-    
-    // Barras de progresso no Resumo
     const totalFl = (rec + desp + pago) || 1;
     const rBars = document.getElementById('r-bars');
     if(rBars) {
@@ -456,7 +479,7 @@ function render(){
           <div class="progress-bg"><div class="progress-fill pf-teal" style="width:${(rec/totalFl)*100}%"></div></div>
         </div>
         <div style="margin-bottom:15px">
-          <div class="row-between" style="font-size:12px; margin-bottom:5px"><span>Despesas (Extras)</span><span>${fmt(desp)}</span></div>
+          <div class="row-between" style="font-size:12px; margin-bottom:5px"><span>Despesas Extras</span><span>${fmt(desp)}</span></div>
           <div class="progress-bg"><div class="progress-fill pf-coral" style="width:${(desp/totalFl)*100}%"></div></div>
         </div>
         <div>
