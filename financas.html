@@ -7,9 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Minhas Finanças">
-
   <title>Minhas Finanças</title>
-  
+ 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230F6E56'/%3E%3Ctext x='50' y='65' font-size='55' text-anchor='middle' fill='white'%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E">
 
@@ -38,16 +37,25 @@
       margin:0 auto;
       background:var(--surface2);
       height:100dvh;
+      display:flex;
+      flex-direction:column;
       overflow:hidden;
     }
     .hero{
       background:#0F6E56;
       padding:50px 20px 24px;
       position:relative;
+      flex-shrink:0;
+    }
+    .main-content{
+      flex:1;
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+      padding-bottom:60px;
     }
     .hero-greeting{font-size:13px;color:#9FE1CB;margin-bottom:2px;}
     .hero-name{font-size:20px;font-weight:500;color:#fff;margin-bottom:20px;}
-    
+   
     .settings-btn{
       position:absolute;
       top:50px;
@@ -61,11 +69,7 @@
       z-index:10;
     }
 
-    .hero-card{
-      background:#1D9E75;
-      border-radius:var(--r-card);
-      padding:18px;
-    }
+    .hero-card{background:#1D9E75;border-radius:var(--r-card);padding:18px;}
     .hero-card-label{font-size:12px;color:#9FE1CB;margin-bottom:4px;}
     .hero-card-value{font-size:28px;font-weight:500;color:#fff;margin-bottom:16px;}
     .hero-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -77,7 +81,7 @@
     .scroller::-webkit-scrollbar{display:none;}
     .chip{flex-shrink:0;padding:8px 16px;border-radius:var(--r-pill);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--border);background:var(--surface);color:var(--muted);white-space:nowrap;}
     .chip.active{background:#0F6E56;color:#fff;border-color:#0F6E56;}
-    .section{display:none;padding:0 16px 24px;}
+    .section{display:none;padding:0 16px 16px;}
     .section.show{display:block;}
     .sec-title{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:16px 0 10px;}
     .card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r-card);padding:14px 16px;margin-bottom:10px;}
@@ -91,37 +95,20 @@
     .pill-warn{background:#FAEEDA;color:#633806;}
     .pill-ok{background:#E1F5EE;color:#085041;}
     .pill-info{background:#E6F1FB;color:#0C447C;}
-    
+   
     .done-circle{
-      width:28px;
-      height:28px;
-      border-radius:50%;
-      border:2px solid var(--border);
-      background:var(--surface);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      flex-shrink:0;
+      width:28px; height:28px; border-radius:50%; border:2px solid var(--border);
+      background:var(--surface); display:flex; align-items:center; justify-content:center;
+      cursor:pointer; flex-shrink:0;
     }
-    .done-circle.yes{
-      background:#1D9E75;
-      border-color:#1D9E75;
-    }
+    .done-circle.yes{background:#1D9E75; border-color:#1D9E75;}
     .done-circle.yes i{font-size:16px;color:#fff;}
 
     .del-btn{
-      background:none;
-      border:none;
-      color:#E24B4A;
-      font-size:20px;
-      cursor:pointer;
-      padding:4px 8px;
-      border-radius:6px;
+      background:none; border:none; color:#E24B4A; font-size:20px;
+      cursor:pointer; padding:4px 8px; border-radius:6px;
     }
-    .del-btn:hover{
-      background:#FFEBEE;
-    }
+    .del-btn:hover{background:#FFEBEE;}
 
     .progress-bg{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:8px 0 4px;}
     .progress-fill{height:100%;border-radius:99px;}
@@ -142,7 +129,7 @@
     .lc-info{flex:1;min-width:0;}
     .lc-desc{font-size:13px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .lc-date{font-size:11px;color:var(--muted);}
-    .navbar{display:flex;border-top:0.5px solid var(--border);background:var(--surface);}
+    .navbar{display:flex;border-top:0.5px solid var(--border);background:var(--surface);flex-shrink:0;}
     .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 12px;cursor:pointer;border:none;background:none;font-size:11px;color:var(--muted);gap:3px;}
     .nav-btn i{font-size:22px;}
     .nav-btn.active{color:#0F6E56;}
@@ -180,76 +167,78 @@
     </div>
   </div>
 
-  <div class="scroller" id="chips-bar">
-    <div class="chip active" onclick="nav('contas',this)"><i class="ti ti-file-invoice" aria-hidden="true"></i> Contas</div>
-    <div class="chip" onclick="nav('metas',this)"><i class="ti ti-target" aria-hidden="true"></i> Metas</div>
-    <div class="chip" onclick="nav('lanc',this)"><i class="ti ti-arrows-exchange" aria-hidden="true"></i> Lançamentos</div>
-    <div class="chip" onclick="nav('resumo',this)"><i class="ti ti-chart-bar" aria-hidden="true"></i> Resumo</div>
-  </div>
-
-  <div class="section show" id="sec-contas">
-    <div class="sum-grid" style="margin-top:16px;">
-      <div class="sum-card"><div class="sum-label">Em aberto</div><div class="sum-value" style="color:#E24B4A;" id="cnt-aberto">R$ 0</div></div>
-      <div class="sum-card"><div class="sum-label">Pagas</div><div class="sum-value" style="color:#1D9E75;" id="cnt-pago">R$ 0</div></div>
+  <div class="main-content">
+    <div class="scroller" id="chips-bar">
+      <div class="chip active" onclick="nav('contas',this)"><i class="ti ti-file-invoice" aria-hidden="true"></i> Contas</div>
+      <div class="chip" onclick="nav('metas',this)"><i class="ti ti-target" aria-hidden="true"></i> Metas</div>
+      <div class="chip" onclick="nav('lanc',this)"><i class="ti ti-arrows-exchange" aria-hidden="true"></i> Lançamentos</div>
+      <div class="chip" onclick="nav('resumo',this)"><i class="ti ti-chart-bar" aria-hidden="true"></i> Resumo</div>
     </div>
 
-    <button class="fab" onclick="toggleForm('form-conta')">
-      <i class="ti ti-plus" aria-hidden="true"></i> Nova conta
-    </button>
+    <div class="section show" id="sec-contas">
+      <div class="sum-grid" style="margin-top:16px;">
+        <div class="sum-card"><div class="sum-label">Em aberto</div><div class="sum-value" style="color:#E24B4A;" id="cnt-aberto">R$ 0</div></div>
+        <div class="sum-card"><div class="sum-label">Pagas</div><div class="sum-value" style="color:#1D9E75;" id="cnt-pago">R$ 0</div></div>
+      </div>
 
-    <div class="toggle-form form-sheet" id="form-conta">
-      <input type="text" id="c-nome" placeholder="Nome da conta" />
-      <input type="number" id="c-valor" placeholder="Valor (R$)" />
-      <input type="date" id="c-venc" />
-      <button onclick="addConta()">Adicionar conta</button>
+      <button class="fab" onclick="toggleForm('form-conta')">
+        <i class="ti ti-plus" aria-hidden="true"></i> Nova conta
+      </button>
+
+      <div class="toggle-form form-sheet" id="form-conta">
+        <input type="text" id="c-nome" placeholder="Nome da conta" />
+        <input type="number" id="c-valor" placeholder="Valor (R$)" />
+        <input type="date" id="c-venc" />
+        <button onclick="addConta()">Adicionar conta</button>
+      </div>
+
+      <p class="sec-title">Contas cadastradas</p>
+      <div id="list-contas"><div class="empty-state"><i class="ti ti-file-off" aria-hidden="true"></i>Nenhuma conta ainda</div></div>
     </div>
 
-    <p class="sec-title">Contas cadastradas</p>
-    <div id="list-contas"><div class="empty-state"><i class="ti ti-file-off" aria-hidden="true"></i>Nenhuma conta ainda</div></div>
-  </div>
-
-  <div class="section" id="sec-metas">
-    <div style="height:16px;"></div>
-    <button class="fab" onclick="toggleForm('form-meta')">
-      <i class="ti ti-plus" aria-hidden="true"></i> Nova meta
-    </button>
-    <div class="toggle-form form-sheet" id="form-meta">
-      <input type="text" id="m-nome" placeholder="Ex: Viagem, Reserva..." />
-      <input type="number" id="m-total" placeholder="Valor total (R$)" />
-      <input type="number" id="m-atual" placeholder="Já tenho (R$)" />
-      <button onclick="addMeta()">Criar meta</button>
+    <div class="section" id="sec-metas">
+      <div style="height:16px;"></div>
+      <button class="fab" onclick="toggleForm('form-meta')">
+        <i class="ti ti-plus" aria-hidden="true"></i> Nova meta
+      </button>
+      <div class="toggle-form form-sheet" id="form-meta">
+        <input type="text" id="m-nome" placeholder="Ex: Viagem, Reserva..." />
+        <input type="number" id="m-total" placeholder="Valor total (R$)" />
+        <input type="number" id="m-atual" placeholder="Já tenho (R$)" />
+        <button onclick="addMeta()">Criar meta</button>
+      </div>
+      <p class="sec-title">Minhas metas</p>
+      <div id="list-metas"><div class="empty-state"><i class="ti ti-target-off" aria-hidden="true"></i>Nenhuma meta criada</div></div>
     </div>
-    <p class="sec-title">Minhas metas</p>
-    <div id="list-metas"><div class="empty-state"><i class="ti ti-target-off" aria-hidden="true"></i>Nenhuma meta criada</div></div>
-  </div>
 
-  <div class="section" id="sec-lanc">
-    <div style="height:16px;"></div>
-    <button class="fab" onclick="toggleForm('form-lanc')">
-      <i class="ti ti-plus" aria-hidden="true"></i> Novo lançamento
-    </button>
-    <div class="toggle-form form-sheet" id="form-lanc">
-      <select id="l-tipo"><option value="receita">Receita</option><option value="despesa">Despesa</option></select>
-      <input type="text" id="l-desc" placeholder="Descrição" />
-      <input type="number" id="l-valor" placeholder="Valor (R$)" />
-      <button onclick="addLanc()">Lançar</button>
+    <div class="section" id="sec-lanc">
+      <div style="height:16px;"></div>
+      <button class="fab" onclick="toggleForm('form-lanc')">
+        <i class="ti ti-plus" aria-hidden="true"></i> Novo lançamento
+      </button>
+      <div class="toggle-form form-sheet" id="form-lanc">
+        <select id="l-tipo"><option value="receita">Receita</option><option value="despesa">Despesa</option></select>
+        <input type="text" id="l-desc" placeholder="Descrição" />
+        <input type="number" id="l-valor" placeholder="Valor (R$)" />
+        <button onclick="addLanc()">Lançar</button>
+      </div>
+      <p class="sec-title">Histórico</p>
+      <div class="card" id="list-lanc-wrap"><div class="empty-state" style="padding:12px 0;"><i class="ti ti-list-search" aria-hidden="true"></i>Nenhum lançamento</div></div>
     </div>
-    <p class="sec-title">Histórico</p>
-    <div class="card" id="list-lanc-wrap"><div class="empty-state" style="padding:12px 0;"><i class="ti ti-list-search" aria-hidden="true"></i>Nenhum lançamento</div></div>
-  </div>
 
-  <div class="section" id="sec-resumo">
-    <div style="height:16px;"></div>
-    <div class="sum-grid">
-      <div class="sum-card"><div class="sum-label">Saldo</div><div class="sum-value" id="r-saldo">R$ 0</div></div>
-      <div class="sum-card"><div class="sum-label">Contas abertas</div><div class="sum-value" style="color:#E24B4A;" id="r-contas">R$ 0</div></div>
-      <div class="sum-card"><div class="sum-label">Guardado</div><div class="sum-value" style="color:#1D9E75;" id="r-metas">R$ 0</div></div>
-      <div class="sum-card"><div class="sum-label">Vencendo hoje</div><div class="sum-value" style="color:#EF9F27;" id="r-hoje">0</div></div>
+    <div class="section" id="sec-resumo">
+      <div style="height:16px;"></div>
+      <div class="sum-grid">
+        <div class="sum-card"><div class="sum-label">Saldo</div><div class="sum-value" id="r-saldo">R$ 0</div></div>
+        <div class="sum-card"><div class="sum-label">Contas abertas</div><div class="sum-value" style="color:#E24B4A;" id="r-contas">R$ 0</div></div>
+        <div class="sum-card"><div class="sum-label">Guardado</div><div class="sum-value" style="color:#1D9E75;" id="r-metas">R$ 0</div></div>
+        <div class="sum-card"><div class="sum-label">Vencendo hoje</div><div class="sum-value" style="color:#EF9F27;" id="r-hoje">0</div></div>
+      </div>
+      <p class="sec-title">Fluxo do mês</p>
+      <div class="card" id="r-bars"></div>
+      <p class="sec-title">Próximos vencimentos</p>
+      <div class="card" id="r-venc"></div>
     </div>
-    <p class="sec-title">Fluxo do mês</p>
-    <div class="card" id="r-bars"></div>
-    <p class="sec-title">Próximos vencimentos</p>
-    <div class="card" id="r-venc"></div>
   </div>
 
   <nav class="navbar">
@@ -262,12 +251,12 @@
 
 <script>
 let C=[], M=[], L=[];
-let userName = "Minhas Finanças";
+let userName = "Caro Cliente";
 
 try{C=JSON.parse(localStorage.getItem('af_c')||'[]');}catch(e){}
 try{M=JSON.parse(localStorage.getItem('af_m')||'[]');}catch(e){}
 try{L=JSON.parse(localStorage.getItem('af_l')||'[]');}catch(e){}
-try{userName = localStorage.getItem('af_userName') || "Minhas Finanças";}catch(e){}
+try{userName = localStorage.getItem('af_userName') || "Caro Cliente";}catch(e){}
 
 const COLORS=['teal','blue','amber','coral'];
 
@@ -303,10 +292,7 @@ function pill(d){
   return'<span class="pill pill-info">'+n+'d</span>';
 }
 
-function toggleForm(id){
-  const el=document.getElementById(id);
-  el.classList.toggle('open');
-}
+function toggleForm(id){document.getElementById(id).classList.toggle('open');}
 
 function nav(page, chip, nb){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
@@ -319,7 +305,8 @@ function nav(page, chip, nb){
   render();
 }
 
-function addConta(){
+// Funções de CRUD (mantidas iguais)
+function addConta(){ /* ... mesmo código anterior ... */ 
   const nome=document.getElementById('c-nome').value.trim();
   const valor=parseFloat(document.getElementById('c-valor').value);
   const venc=document.getElementById('c-venc').value;
@@ -333,17 +320,9 @@ function addConta(){
   render();
 }
 
-function togglePago(id){
-  const c=C.find(x=>x.id===id);
-  if(c){c.pago=!c.pago;save();render();}
-}
-function delConta(id){
-  if(confirm('Excluir esta conta?')){
-    C=C.filter(x=>x.id!==id);save();render();
-  }
-}
-
-function addMeta(){
+function togglePago(id){ const c=C.find(x=>x.id===id); if(c){c.pago=!c.pago;save();render();}}
+function delConta(id){ if(confirm('Excluir esta conta?')){C=C.filter(x=>x.id!==id);save();render();}}
+function addMeta(){ /* mesmo código */ 
   const nome=document.getElementById('m-nome').value.trim();
   const total=parseFloat(document.getElementById('m-total').value);
   const atual=parseFloat(document.getElementById('m-atual').value)||0;
@@ -356,21 +335,16 @@ function addMeta(){
   document.getElementById('form-meta').classList.remove('open');
   render();
 }
-
-function addToMeta(id){
+function addToMeta(id){ /* mesmo código */ 
   const inp=document.getElementById('mi-'+id);
   const v=parseFloat(inp.value);
   if(isNaN(v)||v<=0)return;
   const m=M.find(x=>x.id===id);
   if(m){m.atual=Math.min(m.total,m.atual+v);save();inp.value='';render();}
 }
-function delMeta(id){
-  if(confirm('Excluir esta meta?')){
-    M=M.filter(x=>x.id!==id);save();render();
-  }
-}
+function delMeta(id){if(confirm('Excluir esta meta?')){M=M.filter(x=>x.id!==id);save();render();}}
 
-function addLanc(){
+function addLanc(){ /* mesmo código */ 
   const tipo=document.getElementById('l-tipo').value;
   const desc=document.getElementById('l-desc').value.trim();
   const valor=parseFloat(document.getElementById('l-valor').value);
@@ -382,11 +356,7 @@ function addLanc(){
   document.getElementById('form-lanc').classList.remove('open');
   render();
 }
-function delLanc(id){
-  if(confirm('Excluir este lançamento?')){
-    L=L.filter(x=>x.id!==id);save();render();
-  }
-}
+function delLanc(id){if(confirm('Excluir este lançamento?')){L=L.filter(x=>x.id!==id);save();render();}}
 
 function render(){
   const rec=L.filter(l=>l.tipo==='receita').reduce((s,l)=>s+l.valor,0);
@@ -404,6 +374,7 @@ function render(){
   if(document.getElementById('cnt-aberto'))document.getElementById('cnt-aberto').textContent=fmt(aberto);
   if(document.getElementById('cnt-pago'))document.getElementById('cnt-pago').textContent=fmt(pago);
 
+  // Render das listas (contas, metas, lançamentos, resumo) - mantido igual ao seu código
   const lc=document.getElementById('list-contas');
   if(lc){
     const sorted=[...C].sort((a,b)=>{if(a.pago!==b.pago)return a.pago?1:-1;return(a.venc||'9999')<(b.venc||'9999')?-1:1;});
@@ -428,6 +399,7 @@ function render(){
       </div>`).join('');
   }
 
+  // (Metas, Lançamentos e Resumo mantidos iguais ao seu código original)
   const lm=document.getElementById('list-metas');
   if(lm){
     if(!M.length){lm.innerHTML='<div class="empty-state"><i class="ti ti-target-off" aria-hidden="true"></i>Nenhuma meta criada</div>';}
