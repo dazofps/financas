@@ -106,7 +106,6 @@
     .item-sub{font-size:12px;color:var(--muted);margin-top:2px;}
     .amount{font-size:15px;font-weight:500;}
     
-    /* LANÇAMENTOS FORMATO CORRIGIDO */
     .lc-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--surface2);}
     .lc-row:last-child{border-bottom:none;}
     .lc-info{flex:1;}
@@ -345,6 +344,9 @@ function addConta(){
   if(!n||!v) return;
   C.push({id:Date.now(), nome:n, valor:v, venc:d, pago:false, repetir:r});
   save(); render(); toggleForm('form-conta');
+  document.getElementById('c-nome').value=''; 
+  document.getElementById('c-valor').value='';
+  document.getElementById('c-repetir').checked=false;
 }
 
 function togglePago(id){
@@ -353,7 +355,7 @@ function togglePago(id){
     c.pago = !c.pago;
     if(c.pago){
       c.linkedLancId = Date.now();
-      L.unshift({id: c.linkedLancId, tipo: 'despesa', desc: `Pagamento: ${c.nome}`, valor: c.valor, data: today()});
+      L.unshift({id: c.linkedLancId, tipo: 'despesa', desc: `Pagamento: ${c.nome}`, valor: c.valor, data: today(), accountId: c.id});
       if(c.repetir) {
         const novaData = getNextMonthDate(c.venc);
         const jaExiste = C.find(x => x.nome === c.nome && x.venc === novaData);
@@ -404,13 +406,26 @@ function addLanc(){
   save(); render(); toggleForm('form-lanc');
 }
 
+// SINCRONIZAÇÃO COMPLETA: Metas e Contas
 function delLanc(id){ 
   if(confirm('Excluir este lançamento?')){
     const l = L.find(x => x.id === id);
-    if(l && l.desc.startsWith("Reserva: ")){
-      const metaNome = l.desc.replace("Reserva: ", "");
-      const meta = M.find(m => m.nome === metaNome);
-      if(meta) meta.atual = Math.max(0, meta.atual - l.valor);
+    if(l){
+      // Caso 1: Se for uma reserva de meta
+      if(l.desc.startsWith("Reserva: ")){
+        const metaNome = l.desc.replace("Reserva: ", "");
+        const meta = M.find(m => m.nome === metaNome);
+        if(meta) meta.atual = Math.max(0, meta.atual - l.valor);
+      }
+      
+      // Caso 2: Se for um pagamento de conta
+      if(l.accountId){
+        const conta = C.find(c => c.id === l.accountId);
+        if(conta){
+          conta.pago = false;
+          delete conta.linkedLancId;
+        }
+      }
     }
     L=L.filter(x=>x.id!==id); 
     save(); render();
