@@ -205,7 +205,6 @@
       <div class="chip" onclick="nav('lanc',this)"><i class="ti ti-arrows-exchange"></i> Lançamentos</div>
     </div>
 
-    <!-- 1. RESUMO -->
     <div class="section show" id="sec-resumo">
       <div style="height:16px;"></div>
       <div class="sum-grid">
@@ -217,7 +216,6 @@
       <div class="card" id="r-bars"></div>
     </div>
 
-    <!-- 2. CONTAS -->
     <div class="section" id="sec-contas">
       <div class="sum-grid" style="margin-top:16px;">
         <div class="sum-card"><div class="sum-label">Em aberto</div><div class="sum-value" style="color:#E24B4A;" id="cnt-aberto">R$ 0</div></div>
@@ -239,7 +237,6 @@
       <div id="list-contas"></div>
     </div>
 
-    <!-- 3. METAS -->
     <div class="section" id="sec-metas">
       <div style="height:16px;"></div>
       <button class="fab" onclick="toggleForm('form-meta')">
@@ -255,7 +252,6 @@
       <div id="list-metas"></div>
     </div>
 
-    <!-- 4. LANÇAMENTOS -->
     <div class="section" id="sec-lanc">
       <div style="height:16px;"></div>
       <button class="fab" onclick="toggleForm('form-lanc')">
@@ -406,30 +402,31 @@ function addLanc(){
   save(); render(); toggleForm('form-lanc');
 }
 
-// SINCRONIZAÇÃO COMPLETA: Metas e Contas
-function delLanc(id){ 
-  if(confirm('Excluir este lançamento?')){
-    const l = L.find(x => x.id === id);
-    if(l){
-      // Caso 1: Se for uma reserva de meta
-      if(l.desc.startsWith("Reserva: ")){
-        const metaNome = l.desc.replace("Reserva: ", "");
-        const meta = M.find(m => m.nome === metaNome);
-        if(meta) meta.atual = Math.max(0, meta.atual - l.valor);
-      }
-      
-      // Caso 2: Se for um pagamento de conta
-      if(l.accountId){
-        const conta = C.find(c => c.id === l.accountId);
-        if(conta){
-          conta.pago = false;
-          delete conta.linkedLancId;
-        }
+// LOGICA DE EXCLUSÃO OTIMIZADA PARA CLIQUE RÁPIDO
+function delLanc(id) {
+  const index = L.findIndex(x => x.id === id);
+  if (index === -1) return;
+
+  if (confirm('Excluir este lançamento?')) {
+    const l = L[index];
+
+    if (l.desc && l.desc.startsWith("Reserva: ")) {
+      const metaNome = l.desc.replace("Reserva: ", "");
+      const meta = M.find(m => m.nome === metaNome);
+      if (meta) meta.atual = Math.max(0, meta.atual - l.valor);
+    }
+    
+    if (l.accountId) {
+      const conta = C.find(c => c.id === l.accountId);
+      if (conta) {
+        conta.pago = false;
+        delete conta.linkedLancId;
       }
     }
-    L=L.filter(x=>x.id!==id); 
+
+    L.splice(index, 1);
     save(); render();
-  } 
+  }
 }
 
 function render(){
