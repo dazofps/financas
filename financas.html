@@ -51,7 +51,7 @@
       flex:1;
       overflow-y:auto;
       -webkit-overflow-scrolling:touch;
-      padding-bottom:60px;
+      padding-bottom:10px;
     }
     .hero-greeting{font-size:13px;color:#9FE1CB;margin-bottom:2px;}
     .hero-name{font-size:20px;font-weight:500;color:#fff;margin-bottom:20px;}
@@ -129,10 +129,31 @@
     .lc-info{flex:1;min-width:0;}
     .lc-desc{font-size:13px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .lc-date{font-size:11px;color:var(--muted);}
-    .navbar{display:flex;border-top:0.5px solid var(--border);background:var(--surface);flex-shrink:0;}
-    .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 12px;cursor:pointer;border:none;background:none;font-size:11px;color:var(--muted);gap:3px;}
-    .nav-btn i{font-size:22px;}
+    
+    .navbar{
+      display:flex;
+      border-top:0.5px solid var(--border);
+      background:var(--surface);
+      flex-shrink:0;
+      padding:8px 0 4px;
+    }
+    .nav-btn{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:8px 4px 6px;
+      cursor:pointer;
+      border:none;
+      background:none;
+      color:var(--muted);
+      gap:4px;
+    }
+    .nav-btn i{font-size:26px;}
     .nav-btn.active{color:#0F6E56;}
+    .nav-btn span{display:none;}
+
     .empty-state{text-align:center;padding:24px 16px;color:var(--muted);font-size:13px;}
     .empty-state i{font-size:32px;margin-bottom:8px;display:block;color:var(--hint);}
     .sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
@@ -242,10 +263,18 @@
   </div>
 
   <nav class="navbar">
-    <button class="nav-btn active" id="nb-contas" onclick="nav('contas',null,this)"><i class="ti ti-file-invoice" aria-hidden="true"></i><span>Contas</span></button>
-    <button class="nav-btn" id="nb-metas" onclick="nav('metas',null,this)"><i class="ti ti-target" aria-hidden="true"></i><span>Metas</span></button>
-    <button class="nav-btn" id="nb-lanc" onclick="nav('lanc',null,this)"><i class="ti ti-arrows-exchange" aria-hidden="true"></i><span>Lançamentos</span></button>
-    <button class="nav-btn" id="nb-resumo" onclick="nav('resumo',null,this)"><i class="ti ti-chart-bar" aria-hidden="true"></i><span>Resumo</span></button>
+    <button class="nav-btn active" id="nb-contas" onclick="nav('contas',null,this)">
+      <i class="ti ti-file-invoice" aria-hidden="true"></i>
+    </button>
+    <button class="nav-btn" id="nb-metas" onclick="nav('metas',null,this)">
+      <i class="ti ti-target" aria-hidden="true"></i>
+    </button>
+    <button class="nav-btn" id="nb-lanc" onclick="nav('lanc',null,this)">
+      <i class="ti ti-arrows-exchange" aria-hidden="true"></i>
+    </button>
+    <button class="nav-btn" id="nb-resumo" onclick="nav('resumo',null,this)">
+      <i class="ti ti-chart-bar" aria-hidden="true"></i>
+    </button>
   </nav>
 </div>
 
@@ -292,7 +321,10 @@ function pill(d){
   return'<span class="pill pill-info">'+n+'d</span>';
 }
 
-function toggleForm(id){document.getElementById(id).classList.toggle('open');}
+function toggleForm(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+}
 
 function nav(page, chip, nb){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
@@ -305,8 +337,7 @@ function nav(page, chip, nb){
   render();
 }
 
-// Funções de CRUD (mantidas iguais)
-function addConta(){ /* ... mesmo código anterior ... */ 
+function addConta(){
   const nome=document.getElementById('c-nome').value.trim();
   const valor=parseFloat(document.getElementById('c-valor').value);
   const venc=document.getElementById('c-venc').value;
@@ -320,9 +351,17 @@ function addConta(){ /* ... mesmo código anterior ... */
   render();
 }
 
-function togglePago(id){ const c=C.find(x=>x.id===id); if(c){c.pago=!c.pago;save();render();}}
-function delConta(id){ if(confirm('Excluir esta conta?')){C=C.filter(x=>x.id!==id);save();render();}}
-function addMeta(){ /* mesmo código */ 
+function togglePago(id){
+  const c=C.find(x=>x.id===id);
+  if(c){c.pago=!c.pago;save();render();}
+}
+function delConta(id){
+  if(confirm('Excluir esta conta?')){
+    C=C.filter(x=>x.id!==id);save();render();
+  }
+}
+
+function addMeta(){
   const nome=document.getElementById('m-nome').value.trim();
   const total=parseFloat(document.getElementById('m-total').value);
   const atual=parseFloat(document.getElementById('m-atual').value)||0;
@@ -335,16 +374,21 @@ function addMeta(){ /* mesmo código */
   document.getElementById('form-meta').classList.remove('open');
   render();
 }
-function addToMeta(id){ /* mesmo código */ 
+
+function addToMeta(id){
   const inp=document.getElementById('mi-'+id);
   const v=parseFloat(inp.value);
   if(isNaN(v)||v<=0)return;
   const m=M.find(x=>x.id===id);
   if(m){m.atual=Math.min(m.total,m.atual+v);save();inp.value='';render();}
 }
-function delMeta(id){if(confirm('Excluir esta meta?')){M=M.filter(x=>x.id!==id);save();render();}}
+function delMeta(id){
+  if(confirm('Excluir esta meta?')){
+    M=M.filter(x=>x.id!==id);save();render();
+  }
+}
 
-function addLanc(){ /* mesmo código */ 
+function addLanc(){
   const tipo=document.getElementById('l-tipo').value;
   const desc=document.getElementById('l-desc').value.trim();
   const valor=parseFloat(document.getElementById('l-valor').value);
@@ -356,7 +400,11 @@ function addLanc(){ /* mesmo código */
   document.getElementById('form-lanc').classList.remove('open');
   render();
 }
-function delLanc(id){if(confirm('Excluir este lançamento?')){L=L.filter(x=>x.id!==id);save();render();}}
+function delLanc(id){
+  if(confirm('Excluir este lançamento?')){
+    L=L.filter(x=>x.id!==id);save();render();
+  }
+}
 
 function render(){
   const rec=L.filter(l=>l.tipo==='receita').reduce((s,l)=>s+l.valor,0);
@@ -374,7 +422,6 @@ function render(){
   if(document.getElementById('cnt-aberto'))document.getElementById('cnt-aberto').textContent=fmt(aberto);
   if(document.getElementById('cnt-pago'))document.getElementById('cnt-pago').textContent=fmt(pago);
 
-  // Render das listas (contas, metas, lançamentos, resumo) - mantido igual ao seu código
   const lc=document.getElementById('list-contas');
   if(lc){
     const sorted=[...C].sort((a,b)=>{if(a.pago!==b.pago)return a.pago?1:-1;return(a.venc||'9999')<(b.venc||'9999')?-1:1;});
@@ -399,7 +446,6 @@ function render(){
       </div>`).join('');
   }
 
-  // (Metas, Lançamentos e Resumo mantidos iguais ao seu código original)
   const lm=document.getElementById('list-metas');
   if(lm){
     if(!M.length){lm.innerHTML='<div class="empty-state"><i class="ti ti-target-off" aria-hidden="true"></i>Nenhuma meta criada</div>';}
